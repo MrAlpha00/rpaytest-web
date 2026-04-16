@@ -157,9 +157,74 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## 🌐 External Backend Integration
+
+This project uses an **external backend API** for all payment processing and server-side operations.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│                 Frontend (Next.js)                   │
+│                    localhost:3000                    │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      │ API Calls (create-order, verify-payment, etc.)
+                      │ via src/lib/api.ts
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│            External Backend API                      │
+│          https://rpay.suhasm.online                 │
+│                                                         │
+│  - /api/create-order     (Create Razorpay order)      │
+│  - /api/verify-payment   (Verify payment signature)   │
+│  - /api/webhook          (Handle Razorpay events)     │
+│  - /api/get-razorpay-key (Get public key)             │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      │ Razorpay API
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│                    Razorpay                          │
+│              (Payment Gateway)                       │
+└─────────────────────────────────────────────────────┘
+```
+
+### Centralized API Client
+
+All API calls are managed through `src/lib/api.ts`:
+
+```typescript
+import { api } from '@/lib/api';
+
+// Create order
+const orderData = await api.createOrder(bookId);
+
+// Verify payment
+const verifyData = await api.verifyPayment(
+  razorpay_order_id,
+  razorpay_payment_id,
+  razorpay_signature,
+  bookId
+);
+
+// Get Razorpay key
+const keyData = await api.getRazorpayKey();
+```
+
+### API Helper Features
+
+- ✅ Centralized API calls
+- ✅ Automatic request/response logging
+- ✅ Error handling
+- ✅ Type-safe responses
+- ✅ Console debug logs
+
 ## 📋 API Endpoints
 
 ### POST `/api/create-order`
+
+> **External Backend Endpoint**: `https://rpay.suhasm.online/api/create-order`
 
 Create a Razorpay order for purchasing a book.
 
@@ -186,6 +251,8 @@ Create a Razorpay order for purchasing a book.
 ```
 
 ### POST `/api/verify-payment`
+
+> **External Backend Endpoint**: `https://rpay.suhasm.online/api/verify-payment`
 
 Verify the payment signature after successful payment.
 
@@ -217,6 +284,8 @@ Verify the payment signature after successful payment.
 
 ### GET `/api/download?token=xxx`
 
+> **Local Endpoint**: `/api/download?token=xxx`
+
 Download the purchased eBook file.
 
 **Headers:**
@@ -226,6 +295,8 @@ Download the purchased eBook file.
 - PDF file binary
 
 ### POST `/api/webhook`
+
+> **External Backend Endpoint**: `https://rpay.suhasm.online/api/webhook`
 
 Handle Razorpay webhook events.
 
@@ -242,6 +313,7 @@ Handle Razorpay webhook events.
 3. **Token Expiration**: Download tokens have built-in expiration
 4. **CORS Protection**: API routes are protected against CORS attacks
 5. **Input Validation**: All inputs are validated and sanitized
+6. **External Backend**: Backend logic handled by secure external service
 
 ## 🎨 Customization
 
@@ -285,6 +357,7 @@ npm start
 
 ## 🔧 Production Checklist
 
+- [x] Integrate external backend API
 - [ ] Replace test keys with production keys
 - [ ] Set `DOWNLOAD_TOKEN_SECRET` to a strong, random value
 - [ ] Configure webhook URL in Razorpay dashboard
@@ -292,6 +365,7 @@ npm start
 - [ ] Enable HTTPS
 - [ ] Review and update privacy policy & terms of service
 - [ ] Test with real cards in test mode first
+- [ ] Verify external backend is production-ready
 
 ## 📝 Razorpay Webhook Setup
 
@@ -307,10 +381,19 @@ npm start
 
 ### Payment Modal Not Opening
 
-1. Check browser console for errors
-2. Verify Razorpay script is loaded
-3. Ensure API keys are correct
-4. Check if order creation API is working
+1. Check browser console for errors (look for API logs)
+2. Verify external backend is accessible: `curl https://rpay.suhasm.online/api/create-order`
+3. Ensure `NEXT_PUBLIC_API_BASE_URL` is set correctly in `.env.local`
+4. Verify Razorpay script is loaded
+5. Check if order creation API is working
+
+### External Backend Connection Issues
+
+1. Verify backend URL is correct: `https://rpay.suhasm.online`
+2. Test API endpoint: `curl -X POST https://rpay.suhasm.online/api/create-order -H "Content-Type: application/json" -d '{"bookId":"test"}'`
+3. Check if backend is online and responding
+4. Review browser console for CORS errors
+5. Verify network connectivity
 
 ### Download Not Working
 
@@ -318,13 +401,15 @@ npm start
 2. Check if download token is valid
 3. Ensure PDF file exists in `/public/assets/books/`
 4. Check server logs for errors
+5. Verify download endpoint is accessible
 
 ### API Errors
 
-1. Verify environment variables are set
+1. Verify `NEXT_PUBLIC_API_BASE_URL` environment variable is set
 2. Check Razorpay dashboard for API errors
-3. Review server logs
-4. Ensure CORS headers are correct
+3. Review browser console logs (look for 🔄 and ✅ logs)
+4. Ensure external backend is configured correctly
+5. Test with Postman/curl to verify backend responses
 
 ## 📚 Resources
 
