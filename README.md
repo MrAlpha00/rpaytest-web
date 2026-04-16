@@ -8,14 +8,14 @@ A modern, production-ready eBook selling website built with Next.js, TypeScript,
 - **Book Catalog**: Display eBooks with covers, descriptions, and pricing
 - **Razorpay Integration**: Complete payment flow with test mode support
 - **Secure Downloads**: Token-based download verification
-- **API Routes**: Full backend functionality with Next.js API routes
+- **External Backend**: Full backend functionality via external API
 - **Error Handling**: Comprehensive error handling and loading states
 - **SEO Optimized**: Proper metadata and semantic HTML
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
-- **Backend**: Next.js API Routes
+- **Backend**: External API (https://rpay.suhasm.online)
 - **Payments**: Razorpay (Test Mode)
 - **State**: React Hooks
 - **Deployment**: Vercel-ready
