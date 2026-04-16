@@ -33,6 +33,10 @@ ebook-store/
 │   │   │   └── [id]/              # Book detail page
 │   │   ├── about/                 # About page
 │   │   ├── contact/               # Contact page
+│   │   ├── faq/                   # FAQ page
+│   │   ├── privacy-policy/        # Privacy Policy page
+│   │   ├── terms-and-conditions/  # Terms & Conditions page
+│   │   ├── refund-policy/         # Refund Policy page
 │   │   ├── layout.tsx
 │   │   ├── page.tsx
 │   │   └── globals.css
