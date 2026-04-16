@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { Book } from '@/types';
-import { api } from '@/lib/api';
+import { api, ApiError } from '@/lib/api';
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: unknown;
   }
 }
 
@@ -64,6 +64,7 @@ export default function PurchaseButton({ book, variant = 'full' }: PurchaseButto
       const razorpayKey = razorpayKeyData.key || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
 
       console.log('💳 Opening Razorpay checkout...');
+      
       const options = {
         key: razorpayKey,
         amount: orderData.amount,
@@ -72,7 +73,11 @@ export default function PurchaseButton({ book, variant = 'full' }: PurchaseButto
         description: `Purchase: ${book.title}`,
         image: '/logo.png',
         order_id: orderData.orderId,
-        handler: async (response: any) => {
+        handler: async (response: { 
+          razorpay_order_id: string; 
+          razorpay_payment_id: string; 
+          razorpay_signature: string;
+        }) => {
           console.log('💰 Payment successful!', {
             orderId: response.razorpay_order_id,
             paymentId: response.razorpay_payment_id,
@@ -97,9 +102,12 @@ export default function PurchaseButton({ book, variant = 'full' }: PurchaseButto
             } else {
               throw new Error('Payment verification failed');
             }
-          } catch (verifyError: any) {
+          } catch (verifyError) {
             console.error('❌ Verification error:', verifyError);
-            setError(verifyError.message || 'Payment verification failed. Please contact support.');
+            const errorMessage = verifyError instanceof Error 
+              ? verifyError.message 
+              : 'Payment verification failed. Please contact support.';
+            setError(errorMessage);
           }
         },
         prefill: {
@@ -121,24 +129,21 @@ export default function PurchaseButton({ book, variant = 'full' }: PurchaseButto
         },
       };
 
-      const rzp = new window.Razorpay(options);
+      const Razorpay = window.Razorpay as { new (opts: unknown): { on: (event: string, handler: (response: unknown) => void) => void; open: () => void } };
+      const rzp = new Razorpay(options);
 
-      rzp.on('payment.failed', (response: any) => {
-        console.error('❌ Payment failed:', {
-          code: response.error.code,
-          description: response.error.description,
-          source: response.error.source,
-          step: response.error.step,
-          reason: response.error.reason,
-        });
-        setError(`Payment failed: ${response.error.description}`);
+      rzp.on('payment.failed', (response: unknown) => {
+        console.error('❌ Payment failed:', response);
+        const errorObj = response as { error?: { description?: string } };
+        setError(`Payment failed: ${errorObj.error?.description || 'Unknown error'}`);
         setIsLoading(false);
       });
 
       rzp.open();
-    } catch (err: any) {
+    } catch (err) {
       console.error('❌ Purchase error:', err);
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +188,7 @@ export default function PurchaseButton({ book, variant = 'full' }: PurchaseButto
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-start gap-2">
-            <svg className="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <p className="text-red-800 text-sm flex-1">{error}</p>
