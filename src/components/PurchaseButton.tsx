@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Book } from '@/types';
-import { load } from '@loaders/comload';
 
 declare global {
   interface Window {
@@ -21,7 +20,7 @@ export default function PurchaseButton({ book, variant = 'full' }: PurchaseButto
   const [showDownload, setShowDownload] = useState(false);
   const [downloadToken, setDownloadToken] = useState<string | null>(null);
 
-  const loadRazorpayScript = () => {
+  const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
         resolve(true);
