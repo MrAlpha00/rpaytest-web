@@ -29,12 +29,6 @@ ebook-store/
 │       └── books/           # eBook PDF files
 ├── src/
 │   ├── app/
-│   │   ├── api/
-│   │   │   ├── create-order/      # Create Razorpay order
-│   │   │   ├── verify-payment/   # Verify payment signature
-│   │   │   ├── download/          # Secure file download
-│   │   │   ├── webhook/          # Razorpay webhook handler
-│   │   │   └── get-razorpay-key/ # Get public key
 │   │   ├── book/
 │   │   │   └── [id]/              # Book detail page
 │   │   ├── about/                 # About page
@@ -51,17 +45,21 @@ ebook-store/
 │   ├── data/
 │   │   └── books.ts               # Book catalog data
 │   ├── lib/
+│   │   ├── api.ts                 # External API client
 │   │   └── utils.ts               # Utility functions
 │   └── types/
 │       └── index.ts               # TypeScript interfaces
 ├── .env.example                   # Example environment variables
 ├── .env.local                     # Your environment variables
+├── LOCAL_API_DISABLED.md          # Info about disabled local APIs
 ├── package.json
 ├── tailwind.config.ts
 ├── tsconfig.json
 ├── next.config.js
 └── postcss.config.js
 ```
+
+> **Note**: Local API routes are disabled. All API calls go to external backend: `https://rpay.suhasm.online`
 
 ## 🧪 Testing with Razorpay Test Mode
 
@@ -101,14 +99,17 @@ Copy the example environment file:
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your Razorpay credentials:
+Edit `.env.local` with your configuration:
 
 ```env
-# Razorpay Keys (Get from https://dashboard.razorpay.com/app/keys)
+# External Backend API URL
+NEXT_PUBLIC_API_BASE_URL=https://rpay.suhasm.online
+
+# Razorpay Keys (Used by External Backend)
 RAZORPAY_KEY_ID=rzp_test_YOUR_KEY_ID
 RAZORPAY_KEY_SECRET=rzp_test_YOUR_KEY_SECRET
 
-# Public Razorpay Key (Used in frontend)
+# Public Razorpay Key (Used in frontend for checkout)
 NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_YOUR_KEY_ID
 
 # Encryption Secret for Download Tokens (min 32 characters)
