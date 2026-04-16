@@ -1,9 +1,38 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://rpay.suhasm.online';
-
-interface ApiError {
+export interface ApiError {
   message: string;
   status?: number;
 }
+
+export interface CreateOrderResponse {
+  success: boolean;
+  orderId: string;
+  amount: number;
+  currency: string;
+  book: {
+    id: string;
+    title: string;
+    price: number;
+  };
+}
+
+export interface VerifyPaymentResponse {
+  success: boolean;
+  verified: boolean;
+  paymentId: string;
+  orderId: string;
+  downloadToken?: string;
+  book: {
+    id: string;
+    title: string;
+    fileName: string;
+  };
+}
+
+export interface GetKeyResponse {
+  key: string;
+}
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://rpay.suhasm.online';
 
 class ApiClient {
   private baseUrl: string;
@@ -42,34 +71,38 @@ class ApiClient {
       });
 
       if (!response.ok) {
-        throw {
+        const error: ApiError = {
           message: data.error || 'API request failed',
           status: response.status,
         };
+        throw error;
       }
 
-      return data;
-    } catch (error: any) {
+      return data as T;
+    } catch (error: unknown) {
       console.error(`❌ API Error:`, {
         url,
-        error: error.message || error,
+        error,
       });
-      throw error;
+      
+      if (error instanceof Error) {
+        throw error;
+      }
+      
+      const apiError: ApiError = {
+        message: error && typeof error === 'object' && 'message' in error 
+          ? String((error as ApiError).message) 
+          : 'Unknown error occurred',
+        status: error && typeof error === 'object' && 'status' in error 
+          ? (error as ApiError).status 
+          : undefined,
+      };
+      throw apiError;
     }
   }
 
-  async createOrder(bookId: string) {
-    return this.request<{
-      success: boolean;
-      orderId: string;
-      amount: number;
-      currency: string;
-      book: {
-        id: string;
-        title: string;
-        price: number;
-      };
-    }>('/api/create-order', {
+  async createOrder(bookId: string): Promise<CreateOrderResponse> {
+    return this.request<CreateOrderResponse>('/api/create-order', {
       method: 'POST',
       body: JSON.stringify({ bookId }),
     });
@@ -80,18 +113,8 @@ class ApiClient {
     razorpay_payment_id: string,
     razorpay_signature: string,
     bookId: string
-  ) {
-    return this.request<{
-      success: boolean;
-      verified: boolean;
-      paymentId: string;
-      orderId: string;
-      book: {
-        id: string;
-        title: string;
-        fileName: string;
-      };
-    }>('/api/verify-payment', {
+  ): Promise<VerifyPaymentResponse> {
+    return this.request<VerifyPaymentResponse>('/api/verify-payment', {
       method: 'POST',
       body: JSON.stringify({
         razorpay_order_id,
@@ -102,8 +125,8 @@ class ApiClient {
     });
   }
 
-  async getRazorpayKey() {
-    return this.request<{ key: string }>('/api/get-razorpay-key');
+  async getRazorpayKey(): Promise<GetKeyResponse> {
+    return this.request<GetKeyResponse>('/api/get-razorpay-key');
   }
 }
 
