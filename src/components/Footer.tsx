@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -96,7 +97,7 @@ export default function Footer() {
               © {new Date().getFullYear()} eBook Store. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
-              <img src="/razorpay-logo.png" alt="Razorpay" className="h-6 opacity-50" />
+              <Image src="/razorpay-logo.png" alt="Razorpay" width={24} height={24} className="h-6 w-auto opacity-50" />
               <span className="text-gray-400 text-sm">Secure Payments</span>
             </div>
           </div>
