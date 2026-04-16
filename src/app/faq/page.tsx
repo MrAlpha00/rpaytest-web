@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export const metadata = {
   title: 'FAQ - eBook Store',
   description: 'Frequently Asked Questions about eBook Store - Find answers to common questions about our products and services.',
