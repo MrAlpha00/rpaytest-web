@@ -35,7 +35,7 @@ export default function Contact() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h2>
             <p className="text-gray-600 mb-6">
-              Thank you for contacting us. We'll get back to you within 24-48 hours.
+              Thank you for contacting us. We&apos;ll get back to you within 24-48 hours.
             </p>
             <button
               onClick={() => setSubmitted(false)}
@@ -56,7 +56,7 @@ export default function Contact() {
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
             <p className="text-lg text-gray-600">
-              Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+              Have questions? We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
             </p>
           </div>
 

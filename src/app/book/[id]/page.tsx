@@ -106,7 +106,7 @@ export default function BookPage({ params }: BookPageProps) {
 
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  What you'll get:
+                  What you&apos;ll get:
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3 text-gray-700">
